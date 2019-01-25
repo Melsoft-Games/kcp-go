@@ -259,16 +259,7 @@ func (s *UDPSession) Write(b []byte) (n int, err error) {
 		// controls how much data will be sent to kcp core
 		// to prevent the memory from exhuasting
 		if s.kcp.WaitSnd() < int(s.kcp.snd_wnd) {
-			n = len(b)
-			for {
-				if len(b) <= int(s.kcp.mss) {
-					s.kcp.Send(b)
-					break
-				} else {
-					s.kcp.Send(b[:s.kcp.mss])
-					b = b[s.kcp.mss:]
-				}
-			}
+			s.kcp.Send(b)
 
 			// flush immediately if the queue is full
 			if s.kcp.WaitSnd() >= int(s.kcp.snd_wnd) || !s.writeDelay {
